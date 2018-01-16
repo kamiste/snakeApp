@@ -19,6 +19,9 @@ public class GameView extends JPanel implements ActionListener {
 
     private int dot, tmp = 0;
     private int targetX, targetY;
+    private int score = 0;
+    private final int WIDTH = 460;
+    private final int HEIGHT = 410;
 
     private Timer timer;
 
@@ -26,7 +29,7 @@ public class GameView extends JPanel implements ActionListener {
 
         addKeyListener(new KClick());
         setBackground(Color.BLACK);
-        setBounds(10, 10, 475, 450);
+        setBounds(10, 40, WIDTH, HEIGHT);
         setFocusable(true);
 
         initializeGame();
@@ -34,15 +37,16 @@ public class GameView extends JPanel implements ActionListener {
     }
 
     // metoda do inicjalizacji gry
-    public void initializeGame() {
+    private void initializeGame() {
         x = new ArrayList<Integer>();
         y = new ArrayList<Integer>();
 
         dot = 3;
 
+        // początkowe połóżenie węża
         for (int i = 0; i < dot; i++) {
-            x.add(100 - i * 10);
-            y.add(100);
+            x.add(200 - i * 10);
+            y.add(200);
         }
 
         getTarget();
@@ -59,12 +63,13 @@ public class GameView extends JPanel implements ActionListener {
         doDraw(g);
     }
 
-    public void doDraw(Graphics g) {
+
+    private void doDraw(Graphics g) {
 
         if (status) {
-            // cel ma kolor żółty
+            // cel ma kolor żółty i jest kwadratem
             g.setColor(Color.YELLOW);
-            g.fillOval(targetX, targetY, 10, 10);
+            g.fillRect(targetX, targetY, 10, 10);
 
             for (int i = 0; i < dot; i++) {
                 if (i == 0) {
@@ -82,16 +87,17 @@ public class GameView extends JPanel implements ActionListener {
 
     private void getTarget() {
         Random rand = new Random();
-        int r = rand.nextInt(43);
-        targetX = r * 10;
-        r = rand.nextInt(43);
-        targetY = r * 10;
+        int r = rand.nextInt(44);
+        targetX = 10 + (r * 10);
+        r = rand.nextInt(39);
+        targetY = 10 + (r * 10);
     }
 
     private void checkTarget() {
 
         if (x.contains(targetX) && y.contains(targetY)) {
             ++dot;
+            score += 10;
             // dodanie pola do weza
             x.add(x.get(1));
             y.add(y.get(1));
@@ -99,8 +105,64 @@ public class GameView extends JPanel implements ActionListener {
         }
     }
 
+    private void checkCollision() {
 
-    public void move() {
+        String msg = "Game Over";
+
+        // sprawdzenie czy nie wjechało się w węża
+        for (int i = 1; i < dot; i++) {
+            if (x.get(i).equals(x.get(0)) && y.get(i).equals(y.get(0))) {
+                msg = "You entered the snake!";
+                status = false;
+            }
+        }
+
+        if (x.get(0) > WIDTH) {
+            status = false;
+        }
+
+        if (x.get(0) < 10) {
+            status = false;
+        }
+
+        if (y.get(0) > HEIGHT) {
+            status = false;
+        }
+
+        if (y.get(0) < 10) {
+            status = false;
+        }
+
+        if (status == false) {
+            JOptionPane.showMessageDialog(null, msg);
+            timer.stop();
+            x.clear();
+            y.clear();
+            score = 0;
+            dot = 3;
+
+            for (int i = 0; i < dot; i++) {
+                x.add(200 - i * 10);
+                y.add(200);
+            }
+
+            getTarget();
+            timer.start();
+
+            status = true;
+            right = true;
+            down = false;
+            left = false;
+            up = false;
+
+        }
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    private void move() {
 
         for (int i = dot - 1; i > 0; i--) {
             x.set(i, x.get(i - 1));
@@ -126,10 +188,7 @@ public class GameView extends JPanel implements ActionListener {
             tmp = x.get(0);
             x.set(0, tmp + 10);
         }
-
-
     }
-
 
     // obsluga zdarzen
     @Override
@@ -137,6 +196,7 @@ public class GameView extends JPanel implements ActionListener {
 
         if (status) {
             checkTarget();
+            checkCollision();
             move();
         }
 
@@ -150,36 +210,29 @@ public class GameView extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
 
-            if ((key == KeyEvent.VK_UP)) {
+            // aby wąż nierobił cały czas kolizji w jednej płaszczyznie !
+            if ((key == KeyEvent.VK_UP && !down)) {
                 up = true;
-                down = false;
                 right = false;
                 left = false;
-                System.out.println("UP");
             }
 
-            if ((key == KeyEvent.VK_DOWN)) {
-                up = false;
+            if ((key == KeyEvent.VK_DOWN && !up)) {
                 down = true;
                 right = false;
                 left = false;
-                System.out.println("DOWN");
             }
 
-            if ((key == KeyEvent.VK_LEFT)) {
+            if ((key == KeyEvent.VK_LEFT && !right)) {
                 up = false;
                 down = false;
-                right = false;
                 left = true;
-                System.out.println("LEFT");
             }
 
-            if ((key == KeyEvent.VK_RIGHT)) {
+            if ((key == KeyEvent.VK_RIGHT && !left)) {
                 up = false;
                 down = false;
                 right = true;
-                left = false;
-                System.out.println("RIGHT");
             }
 
         }
