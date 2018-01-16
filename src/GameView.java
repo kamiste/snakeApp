@@ -38,6 +38,7 @@ public class GameView extends JPanel implements ActionListener {
 
     // metoda do inicjalizacji gry
     private void initializeGame() {
+
         x = new ArrayList<Integer>();
         y = new ArrayList<Integer>();
 
@@ -107,33 +108,34 @@ public class GameView extends JPanel implements ActionListener {
 
     private void checkCollision() {
 
-        String msg = "Game Over";
+        String msg = "Game Over, click for new game";
 
-        // sprawdzenie czy nie wjechało się w węża
+        // sprawdzenie kolizji z wężem
         for (int i = 1; i < dot; i++) {
             if (x.get(i).equals(x.get(0)) && y.get(i).equals(y.get(0))) {
-                msg = "You entered the snake!";
+                msg = "<html><center>~ You entered the snake, game is over ~</center>" +
+                        "<center>Click OK for new game!</center></html>";
                 status = false;
             }
         }
 
-        if (x.get(0) > WIDTH) {
+        if (x.get(0) > WIDTH - 10) {
             status = false;
         }
 
-        if (x.get(0) < 10) {
+        if (x.get(0) < 0) {
             status = false;
         }
 
-        if (y.get(0) > HEIGHT) {
+        if (y.get(0) > HEIGHT - 10) {
             status = false;
         }
 
-        if (y.get(0) < 10) {
+        if (y.get(0) < 0) {
             status = false;
         }
 
-        if (status == false) {
+        if (!status) {
             JOptionPane.showMessageDialog(null, msg);
             timer.stop();
             x.clear();

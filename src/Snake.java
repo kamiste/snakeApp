@@ -61,4 +61,5 @@ public class Snake extends JFrame {
 
         }
     }
+
 }
